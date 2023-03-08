@@ -5,6 +5,7 @@ from ucb import main, trace, interact
 
 GOAL_SCORE = 100  # The goal of Hog is to score 100 points.
 
+
 ######################
 # Phase 1: Simulator #
 ######################
@@ -22,6 +23,15 @@ def roll_dice(num_rolls, dice=six_sided):
     assert num_rolls > 0, 'Must roll at least once.'
     # BEGIN PROBLEM 1
     "*** YOUR CODE HERE ***"
+    sum = 0
+    flag = 0
+    while num_rolls != 0:
+        roll = dice()
+        if roll == 1: flag = 1
+        sum += roll
+        num_rolls -= 1
+    if flag: return 1
+    return sum
     # END PROBLEM 1
 
 
@@ -32,6 +42,13 @@ def piggy_points(score):
     """
     # BEGIN PROBLEM 2
     "*** YOUR CODE HERE ***"
+    s2 = score ** 2
+    k = 100010
+    while s2 > 10:
+        k = min(k, s2 % 10)
+        s2 //= 10
+    k = min(k, s2)
+    return k + 3
     # END PROBLEM 2
 
 
@@ -52,6 +69,10 @@ def take_turn(num_rolls, opponent_score, dice=six_sided, goal=GOAL_SCORE):
     assert opponent_score < goal, 'The game should be over.'
     # BEGIN PROBLEM 3
     "*** YOUR CODE HERE ***"
+    if num_rolls == 0: return piggy_points(opponent_score)
+    sum = roll_dice(num_rolls, dice)
+    if sum == 0: sum = piggy_points(sum)
+    return sum
     # END PROBLEM 3
 
 
@@ -74,6 +95,12 @@ def more_boar(player_score, opponent_score):
     """
     # BEGIN PROBLEM 4
     "*** YOUR CODE HERE ***"
+    ps = str(player_score) if player_score >= 10 else '0' + str(player_score)
+    os = str(opponent_score) if opponent_score >= 10 else '0' + str(opponent_score)
+    if ps[0] < os[0] and ps[1] < os[1]:
+        return True
+    else:
+        return False
     # END PROBLEM 4
 
 
@@ -113,6 +140,15 @@ def play(strategy0, strategy1, score0=0, score1=0, dice=six_sided,
     who = 0  # Who is about to take a turn, 0 (first) or 1 (second)
     # BEGIN PROBLEM 5
     "*** YOUR CODE HERE ***"
+    while score0 < goal and score1 < goal:
+        if who == 0:
+            score0 += take_turn(strategy0(score0, score1), score1, dice, goal)
+            if more_boar(score0, score1): continue
+            who = next_player(who)
+        else:
+            score1 += take_turn(strategy1(score1, score0), score0, dice, goal)
+            if more_boar(score1, score0): continue
+            who = next_player(who)
     # END PROBLEM 5
     # (note that the indentation for the problem 6 prompt (***YOUR CODE HERE***) might be misleading)
     # BEGIN PROBLEM 6
@@ -145,6 +181,7 @@ def announce_lead_changes(last_leader=None):
     >>> f5 = f4(15, 13)
     Player 0 takes the lead by 2
     """
+
     def say(score0, score1):
         if score0 > score1:
             leader = 0
@@ -155,6 +192,7 @@ def announce_lead_changes(last_leader=None):
         if leader != None and leader != last_leader:
             print('Player', leader, 'takes the lead by', abs(score0 - score1))
         return announce_lead_changes(leader)
+
     return say
 
 
@@ -174,8 +212,10 @@ def both(f, g):
     Player 0 now has 10 and Player 1 now has 17
     Player 1 takes the lead by 7
     """
+
     def say(score0, score1):
         return both(f(score0, score1), g(score0, score1))
+
     return say
 
 
@@ -222,8 +262,10 @@ def always_roll(n):
     >>> strategy(99, 99)
     5
     """
+
     def strategy(score, opponent_score):
         return n
+
     return strategy
 
 
@@ -283,10 +325,10 @@ def run_experiments():
     print('Max scoring num rolls for six-sided dice:', six_sided_max)
     print('always_roll(6) win rate:', average_win_rate(always_roll(6)))
 
-    #print('always_roll(8) win rate:', average_win_rate(always_roll(8)))
-    #print('piggypoints_strategy win rate:', average_win_rate(piggypoints_strategy))
-    #print('more_boar_strategy win rate:', average_win_rate(more_boar_strategy))
-    #print('final_strategy win rate:', average_win_rate(final_strategy))
+    # print('always_roll(8) win rate:', average_win_rate(always_roll(8)))
+    # print('piggypoints_strategy win rate:', average_win_rate(piggypoints_strategy))
+    # print('more_boar_strategy win rate:', average_win_rate(more_boar_strategy))
+    # print('final_strategy win rate:', average_win_rate(final_strategy))
     "*** You may add additional experiments as you wish ***"
 
 
@@ -317,6 +359,7 @@ def final_strategy(score, opponent_score):
     # BEGIN PROBLEM 12
     return 6  # Replace this statement
     # END PROBLEM 12
+
 
 ##########################
 # Command Line Interface #
